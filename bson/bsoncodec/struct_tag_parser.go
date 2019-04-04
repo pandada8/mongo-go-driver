@@ -33,6 +33,7 @@ func (stpf StructTagParserFunc) ParseStructTags(sf reflect.StructField) (StructT
 // adjust the marshalling behavior for the field.
 //
 // The properties are defined below:
+//     CastNull   null should be cast into zero value
 //
 //     OmitEmpty  Only include the field if it's not set to the zero value for the type or to
 //                empty slices or maps.
@@ -53,6 +54,7 @@ func (stpf StructTagParserFunc) ParseStructTags(sf reflect.StructField) (StructT
 // TODO(skriptble): Add tags for undefined as nil and for null as nil.
 type StructTags struct {
 	Name      string
+	CastNull  bool
 	OmitEmpty bool
 	MinSize   bool
 	Truncate  bool
@@ -110,6 +112,8 @@ var DefaultStructTagParser StructTagParserFunc = func(sf reflect.StructField) (S
 			st.Truncate = true
 		case "inline":
 			st.Inline = true
+		case "castnull":
+			st.CastNull = true
 		}
 	}
 

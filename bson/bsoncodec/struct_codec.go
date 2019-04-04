@@ -187,6 +187,11 @@ func (sc *StructCodec) DecodeValue(r DecodeContext, vr bsonrw.ValueReader, val r
 			field = val.FieldByIndex(fd.inline)
 		}
 
+		if vr.Type() == bsontype.Null && fd.castNull {
+			vr.Skip()
+			continue
+		}
+
 		if !field.CanSet() { // Being settable is a super set of being addressable.
 			return fmt.Errorf("cannot decode element '%s' into field %v; it is not settable", name, field)
 		}
@@ -256,6 +261,7 @@ type fieldDescription struct {
 	name      string
 	idx       int
 	omitEmpty bool
+	castNull  bool
 	minSize   bool
 	truncate  bool
 	inline    []int
@@ -309,6 +315,7 @@ func (sc *StructCodec) describeStruct(r *Registry, t reflect.Type) (*structDescr
 		description.omitEmpty = stags.OmitEmpty
 		description.minSize = stags.MinSize
 		description.truncate = stags.Truncate
+		description.castNull = stags.CastNull
 
 		if stags.Inline {
 			switch sf.Type.Kind() {
